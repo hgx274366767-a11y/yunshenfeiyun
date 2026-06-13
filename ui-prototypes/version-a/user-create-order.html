@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>云深飞运 - 发布吊运需求</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F7FA;
+            min-height: 100vh;
+            color: #1A1A1A;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px;
+            background: white;
+            border-bottom: 1px solid #ECECEC;
+        }
+        .navbar-back { font-size: 15px; color: #333; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .navbar-title { font-size: 17px; font-weight: 600; }
+        .container { padding: 12px 16px; max-width: 420px; margin: 0 auto; }
+        .section { margin-bottom: 16px; }
+        .section-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px 0;
+        }
+        .section-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: #EBF3FF; display: flex; align-items: center; justify-content: center;
+        }
+        .section-icon i { font-size: 14px; color: #4361EE; }
+        .section-title { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+        .form-card {
+            background: white; border-radius: 12px; padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .form-row { margin-bottom: 16px; }
+        .form-row:last-child { margin-bottom: 0; }
+        .form-label {
+            display: block; font-size: 13px; font-weight: 500;
+            color: #666; margin-bottom: 8px;
+        }
+        .form-label .required { color: #FF4D4F; margin-left: 2px; }
+        .form-input {
+            width: 100%; height: 48px; padding: 0 14px;
+            font-size: 15px; border: 1px solid #E8E8E8;
+            border-radius: 8px; background: #F8F8F8;
+            outline: none; transition: all 0.2s;
+        }
+        .form-input:focus { border-color: #4361EE; background: white; }
+        .form-input::placeholder { color: #BFBFBF; }
+        .form-textarea {
+            width: 100%; min-height: 88px; padding: 12px 14px;
+            font-size: 15px; border: 1px solid #E8E8E8;
+            border-radius: 8px; background: #F8F8F8;
+            outline: none; resize: vertical; font-family: inherit;
+        }
+        .form-textarea:focus { border-color: #4361EE; background: white; }
+        .address-group { display: flex; gap: 10px; }
+        .address-group .form-input { flex: 1; }
+        .map-btn {
+            width: 48px; height: 48px;
+            background: #4361EE; border: none; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0;
+        }
+        .map-btn i { font-size: 18px; color: white; }
+        .input-row { display: flex; gap: 12px; }
+        .input-row > div { flex: 1; }
+        .input-wrapper { position: relative; }
+        .input-unit {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            font-size: 13px; color: #999;
+        }
+        .urgency-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .urgency-btn {
+            padding: 10px 16px; font-size: 13px; font-weight: 500;
+            border: 1px solid #E8E8E8; border-radius: 8px;
+            background: white; color: #666; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .urgency-btn.active { border-color: #4361EE; color: #4361EE; background: #F0F5FF; }
+        .urgency-btn:hover { border-color: #4361EE; }
+        .submit-area { padding: 16px; background: white; border-top: 1px solid #ECECEC; }
+        .btn-submit {
+            width: 100%; height: 50px; font-size: 16px; font-weight: 600;
+            color: white; background: #4361EE;
+            border: none; border-radius: 10px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-submit:hover { background: #3651DE; }
+        .btn-submit i { font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="navbar-back"><i class="fas fa-chevron-left"></i> 返回</span>
+        <span class="navbar-title">发布吊运需求</span>
+        <span style="width: 60px;"></span>
+    </div>
+    
+    <div class="container">
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <span class="section-title">地址信息</span>
+            </div>
+            <div class="form-card">
+                <div class="form-row">
+                    <label class="form-label">起始地址 <span class="required">*</span></label>
+                    <div class="address-group">
+                        <input type="text" class="form-input" placeholder="请输入起始地址">
+                        <button type="button" class="map-btn"><i class="fas fa-location-dot"></i></button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">目的地址 <span class="required">*</span></label>
+                    <div class="address-group">
+                        <input type="text" class="form-input" placeholder="请输入目的地址">
+                        <button type="button" class="map-btn"><i class="fas fa-location-dot"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fas fa-box"></i></div>
+                <span class="section-title">货物信息</span>
+            </div>
+            <div class="form-card">
+                <div class="form-row">
+                    <label class="form-label">货物描述 <span class="required">*</span></label>
+                    <textarea class="form-textarea" placeholder="请描述货物信息，如：新鲜脐橙 500箱"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="input-row">
+                        <div>
+                            <label class="form-label">重量 <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" class="form-input" placeholder="0">
+                                <span class="input-unit">kg</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">价值 <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" class="form-input" placeholder="0">
+                                <span class="input-unit">元</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fas fa-plane"></i></div>
+                <span class="section-title">飞行参数</span>
+            </div>
+            <div class="form-card">
+                <div class="form-row">
+                    <label class="form-label">距离 <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <input type="number" class="form-input" placeholder="系统将根据地址自动计算" readonly>
+                        <span class="input-unit">km</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">落差 <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <input type="number" class="form-input" placeholder="系统将根据地址自动计算" readonly>
+                        <span class="input-unit">m</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">时效要求 <span class="required">*</span></label>
+                    <div class="urgency-group">
+                        <button type="button" class="urgency-btn active">2小时内</button>
+                        <button type="button" class="urgency-btn">今天内</button>
+                        <button type="button" class="urgency-btn">明天内</button>
+                        <button type="button" class="urgency-btn">不限</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-header">
+                <div class="section-icon"><i class="fas fa-user"></i></div>
+                <span class="section-title">联系方式</span>
+            </div>
+            <div class="form-card">
+                <div class="form-row">
+                    <label class="form-label">联系电话 <span class="required">*</span></label>
+                    <input type="tel" class="form-input" placeholder="请输入联系电话" maxlength="11">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">备注</label>
+                    <input type="text" class="form-input" placeholder="如有特殊要求请填写">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="submit-area">
+        <button type="button" class="btn-submit">
+            <i class="fas fa-paper-plane"></i> 发布需求
+        </button>
+    </div>
+</body>
+</html>

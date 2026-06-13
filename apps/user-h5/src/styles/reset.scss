@@ -1,0 +1,50 @@
+@use './variables' as *;
+
+// 样式重置
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: $font-size-lg;
+  line-height: 1.5;
+  color: $color-text-primary;
+  background-color: $color-bg-page;
+  min-height: 100vh;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font-family: inherit;
+}
+
+img {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+ul,
+ol {
+  list-style: none;
+}

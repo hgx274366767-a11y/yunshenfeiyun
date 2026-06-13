@@ -1,0 +1,1 @@
+"use strict";const e=require("../utils/request.js");exports.cancelOrder=async function(r){await e.request.patch(`/orders/${r}/cancel`)},exports.createOrder=async function(r){return(await e.request.post("/create-order",r)).order},exports.getOrderDetail=async function(r){return e.request.get(`/orders/${r}`)},exports.getOrderList=async function(r){return e.request.get("/orders",r)};

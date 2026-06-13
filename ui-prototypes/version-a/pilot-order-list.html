@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>云深飞运飞手端 - 待接订单</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F7FA;
+            min-height: 100vh;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #1E3A5F 0%, #2D5A87 100%);
+        }
+        .navbar-title { font-size: 17px; font-weight: 600; color: white; }
+        .navbar-badge {
+            padding: 4px 12px; font-size: 12px; font-weight: 600;
+            background: rgba(255,255,255,0.2); color: white;
+            border-radius: 12px;
+        }
+        .container { padding: 12px 16px; max-width: 420px; margin: 0 auto; }
+        .filter-bar {
+            display: flex; gap: 8px; margin-bottom: 16px;
+            overflow-x: auto; padding-bottom: 4px;
+        }
+        .filter-btn {
+            padding: 8px 14px; font-size: 12px; font-weight: 500;
+            border: 1px solid #E8E8E8; border-radius: 16px;
+            background: white; color: #666; cursor: pointer;
+            white-space: nowrap; transition: all 0.2s;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .filter-btn.active { background: #4361EE; color: white; border-color: #4361EE; }
+        .filter-btn i { font-size: 11px; }
+        .order-card {
+            background: white; border-radius: 12px;
+            padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .order-card:hover { transform: translateY(-1px); }
+        .order-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 14px;
+        }
+        .order-id { font-size: 13px; color: #999; }
+        .order-time { font-size: 11px; color: #BFBFBF; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+        .order-route {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px; padding: 14px;
+            background: #F8F9FA; border-radius: 10px;
+        }
+        .route-line { flex: 1; height: 1px; background: #E8E8E8; }
+        .route-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .route-dot.start { background: #4361EE; }
+        .route-dot.end { background: #52C41A; }
+        .route-info { text-align: center; }
+        .route-address { font-size: 14px; font-weight: 600; color: #1A1A1A; }
+        .order-details {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 14px; margin-bottom: 16px;
+        }
+        .detail-item { display: flex; align-items: center; gap: 10px; }
+        .detail-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: #F0F5FF; display: flex; align-items: center; justify-content: center;
+        }
+        .detail-icon i { font-size: 14px; color: #4361EE; }
+        .detail-content { flex: 1; }
+        .detail-value { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+        .detail-label { font-size: 11px; color: #BFBFBF; }
+        .order-cargo {
+            padding: 12px 14px; background: #F8F9FA;
+            border-radius: 8px; margin-bottom: 16px;
+        }
+        .cargo-label { font-size: 11px; color: #999; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        .cargo-label i { font-size: 10px; }
+        .cargo-value { font-size: 13px; color: #1A1A1A; }
+        .order-actions { display: flex; gap: 10px; }
+        .btn-reject {
+            flex: 1; height: 44px; font-size: 14px; font-weight: 500;
+            border: 1px solid #E8E8E8; border-radius: 8px;
+            background: white; color: #999; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-accept {
+            flex: 2; height: 44px; font-size: 14px; font-weight: 600;
+            border: none; border-radius: 8px;
+            background: #4361EE; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-accept:hover { background: #3651DE; }
+        .tabbar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            display: flex; background: white;
+            border-top: 1px solid #ECECEC;
+            padding: 6px 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .tabbar-item {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            padding: 6px 0; font-size: 10px; color: #BFBFBF;
+            cursor: pointer;
+        }
+        .tabbar-item.active { color: #4361EE; }
+        .tabbar-icon { font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="navbar-title">待接订单</span>
+        <span class="navbar-badge"><i class="fas fa-bell"></i> 3 个新订单</span>
+    </div>
+    
+    <div class="container">
+        <div class="filter-bar">
+            <button class="filter-btn active"><i class="fas fa-filter"></i> 全部</button>
+            <button class="filter-btn"><i class="fas fa-road"></i> 距离近</button>
+            <button class="filter-btn"><i class="fas fa-weight-hanging"></i> 重量轻</button>
+            <button class="filter-btn"><i class="fas fa-clock"></i> 时效急</button>
+        </div>
+        
+        <div class="order-card">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">#20240612001</div>
+                    <div class="order-time"><i class="far fa-clock"></i> 5分钟前发布</div>
+                </div>
+            </div>
+            
+            <div class="order-route">
+                <div class="route-info">
+                    <div class="route-address">重庆渝北</div>
+                </div>
+                <div class="route-dot start"></div>
+                <div class="route-line"></div>
+                <div class="route-dot end"></div>
+                <div class="route-info">
+                    <div class="route-address">四川广安</div>
+                </div>
+            </div>
+            
+            <div class="order-details">
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-road"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">15.5 km</div>
+                        <div class="detail-label">距离</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-weight-hanging"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">250 kg</div>
+                        <div class="detail-label">重量</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-mountain"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">350 m</div>
+                        <div class="detail-label">落差</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-clock"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">2小时内</div>
+                        <div class="detail-label">时效</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-cargo">
+                <div class="cargo-label"><i class="fas fa-box"></i> 货物信息</div>
+                <div class="cargo-value">新鲜脐橙 500箱 | 价值 ￥15,000</div>
+            </div>
+            
+            <div class="order-actions">
+                <button class="btn-reject"><i class="fas fa-times"></i> 放弃</button>
+                <button class="btn-accept"><i class="fas fa-check"></i> 接单</button>
+            </div>
+        </div>
+        
+        <div class="order-card">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">#20240612002</div>
+                    <div class="order-time"><i class="far fa-clock"></i> 12分钟前发布</div>
+                </div>
+            </div>
+            
+            <div class="order-route">
+                <div class="route-info">
+                    <div class="route-address">重庆涪陵</div>
+                </div>
+                <div class="route-dot start"></div>
+                <div class="route-line"></div>
+                <div class="route-dot end"></div>
+                <div class="route-info">
+                    <div class="route-address">重庆武隆</div>
+                </div>
+            </div>
+            
+            <div class="order-details">
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-road"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">8.2 km</div>
+                        <div class="detail-label">距离</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-weight-hanging"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">180 kg</div>
+                        <div class="detail-label">重量</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-mountain"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">520 m</div>
+                        <div class="detail-label">落差</div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-clock"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-value">今天内</div>
+                        <div class="detail-label">时效</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-cargo">
+                <div class="cargo-label"><i class="fas fa-box"></i> 货物信息</div>
+                <div class="cargo-value">农资肥料 200袋 | 价值 ￥8,000</div>
+            </div>
+            
+            <div class="order-actions">
+                <button class="btn-reject"><i class="fas fa-times"></i> 放弃</button>
+                <button class="btn-accept"><i class="fas fa-check"></i> 接单</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tabbar">
+        <div class="tabbar-item active">
+            <i class="tabbar-icon fas fa-clipboard-list"></i>
+            <span>接单</span>
+        </div>
+        <div class="tabbar-item">
+            <i class="tabbar-icon fas fa-helicopter"></i>
+            <span>任务</span>
+        </div>
+        <div class="tabbar-item">
+            <i class="tabbar-icon fas fa-user"></i>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>云深飞运 - 我的订单</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F7FA;
+            min-height: 100vh;
+        }
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            padding: 14px 16px;
+            background: white;
+            border-bottom: 1px solid #ECECEC;
+        }
+        .navbar-title { font-size: 17px; font-weight: 600; }
+        .container { padding: 12px 16px; max-width: 420px; margin: 0 auto; }
+        .tabs {
+            display: flex; gap: 8px; margin-bottom: 16px;
+            background: white; border-radius: 10px; padding: 4px;
+        }
+        .tab {
+            flex: 1; padding: 10px; font-size: 13px; font-weight: 500;
+            text-align: center; border-radius: 8px;
+            background: transparent; color: #999;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .tab.active { background: #4361EE; color: white; }
+        .order-card {
+            background: white; border-radius: 12px;
+            padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .order-card:hover { transform: translateY(-1px); }
+        .order-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 14px;
+        }
+        .order-id { font-size: 13px; color: #999; }
+        .order-status { padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 12px; }
+        .status-pending { background: #FFF7E6; color: #FA8C16; }
+        .status-accepted { background: #E6F7FF; color: #1890FF; }
+        .status-completed { background: #F5F5F5; color: #999; }
+        .order-route {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 16px;
+        }
+        .route-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .route-dot.start { background: #4361EE; }
+        .route-dot.end { background: #52C41A; }
+        .route-line { flex: 1; height: 1px; background: #E8E8E8; }
+        .route-text { font-size: 13px; color: #666; max-width: 80px; }
+        .route-text.start { text-align: right; }
+        .order-info {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; padding-top: 14px;
+            border-top: 1px solid #F5F5F5;
+        }
+        .info-item { text-align: center; }
+        .info-value { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+        .info-label { font-size: 11px; color: #BFBFBF; margin-top: 2px; }
+        .tabbar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            display: flex; background: white;
+            border-top: 1px solid #ECECEC;
+            padding: 6px 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .tabbar-item {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            padding: 6px 0; font-size: 10px; color: #BFBFBF;
+            cursor: pointer;
+        }
+        .tabbar-item.active { color: #4361EE; }
+        .tabbar-icon { font-size: 20px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="navbar-title">我的订单</span>
+    </div>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active">全部</div>
+            <div class="tab">进行中</div>
+            <div class="tab">已完成</div>
+        </div>
+        
+        <div class="order-card">
+            <div class="order-header">
+                <span class="order-id">#20240612001</span>
+                <span class="order-status status-accepted">已接单</span>
+            </div>
+            <div class="order-route">
+                <span class="route-text start">重庆渝北</span>
+                <div class="route-dot start"></div>
+                <div class="route-line"></div>
+                <div class="route-dot end"></div>
+                <span class="route-text">四川广安</span>
+            </div>
+            <div class="order-info">
+                <div class="info-item">
+                    <div class="info-value">15.5</div>
+                    <div class="info-label">距离(km)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">250</div>
+                    <div class="info-label">重量(kg)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">350</div>
+                    <div class="info-label">落差(m)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">2h</div>
+                    <div class="info-label">时效</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="order-card">
+            <div class="order-header">
+                <span class="order-id">#20240612002</span>
+                <span class="order-status status-pending">待接单</span>
+            </div>
+            <div class="order-route">
+                <span class="route-text start">重庆涪陵</span>
+                <div class="route-dot start"></div>
+                <div class="route-line"></div>
+                <div class="route-dot end"></div>
+                <span class="route-text">重庆武隆</span>
+            </div>
+            <div class="order-info">
+                <div class="info-item">
+                    <div class="info-value">8.2</div>
+                    <div class="info-label">距离(km)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">180</div>
+                    <div class="info-label">重量(kg)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">520</div>
+                    <div class="info-label">落差(m)</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">今天</div>
+                    <div class="info-label">时效</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tabbar">
+        <div class="tabbar-item">
+            <i class="tabbar-icon fas fa-home"></i>
+            <span>首页</span>
+        </div>
+        <div class="tabbar-item active">
+            <i class="tabbar-icon fas fa-clipboard-list"></i>
+            <span>订单</span>
+        </div>
+        <div class="tabbar-item">
+            <i class="tabbar-icon fas fa-user"></i>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

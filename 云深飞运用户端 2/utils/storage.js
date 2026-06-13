@@ -1,0 +1,1 @@
+"use strict";const t=require("../common/vendor.js"),n="auth_token";exports.getToken=function(){return function(n){try{return t.index.getStorageSync(n)}catch{return null}}(n)},exports.removeToken=function(){!function(n){try{t.index.removeStorageSync(n)}catch{}}(n)},exports.setToken=function(e){!function(n,e){try{t.index.setStorageSync(n,e)}catch{}}(n,e)};

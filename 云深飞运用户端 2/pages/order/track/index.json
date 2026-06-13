@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "飞行追踪",
+  "usingComponents": {
+    "van-steps": "@vant/weapp/steps/index"
+  }
+}

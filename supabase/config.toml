@@ -1,0 +1,17 @@
+# Supabase 项目配置 — 云深飞运
+# 仅用于云部署 (不启用本地模拟)
+project_id = "rhfruguxtprgdlrlmzis"
+
+[api]
+enabled = true
+
+[db]
+major_version = 17
+
+[functions]
+
+[storage]
+enabled = true
+
+[auth]
+enabled = true

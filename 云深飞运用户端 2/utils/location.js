@@ -1,0 +1,1 @@
+"use strict";function t(t){return t*Math.PI/180}require("../common/vendor.js"),exports.getDistance=function(a,n){const s=t(n.lat-a.lat),r=t(n.lng-a.lng),h=Math.sin(s/2)*Math.sin(s/2)+Math.cos(t(a.lat))*Math.cos(t(n.lat))*Math.sin(r/2)*Math.sin(r/2),M=2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));return Math.round(6371*M*100)/100};

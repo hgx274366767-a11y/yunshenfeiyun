@@ -1,0 +1,16 @@
+{
+  "name": "yunshen-drone-delivery",
+  "version": "0.1.0",
+  "private": true,
+  "description": "云深飞运 - 无人机吊运服务平台",
+  "scripts": {
+    "db:migrate": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff",
+    "functions:serve": "supabase functions serve",
+    "functions:deploy": "supabase functions deploy"
+  },
+  "devDependencies": {
+    "supabase": "^2.98.2"
+  }
+}

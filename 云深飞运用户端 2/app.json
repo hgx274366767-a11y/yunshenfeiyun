@@ -1,0 +1,57 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/order/create/index",
+    "pages/order/list/index",
+    "pages/order/detail/index",
+    "pages/order/track/index",
+    "pages/profile/index",
+    "pages/login/index",
+    "pages/insurance/list",
+    "pages/realname/index"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "云深飞运",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1989FA",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/order/list/index",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "获取您的位置用于地图选点和飞行追踪"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
+  "sdkConfigs": {
+    "maps": {
+      "qqmap": {
+        "key": "YFFBZ-42FCM-BWB6G-6MY53-4ZY53-ECBV6"
+      }
+    }
+  },
+  "usingComponents": {}
+}
