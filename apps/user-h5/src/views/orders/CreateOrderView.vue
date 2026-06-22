@@ -1,566 +1,508 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { showFailToast, showSuccessToast } from 'vant'
-import { useAuthStore } from '@/stores/auth'
 import { useOrdersStore } from '@/stores/orders'
-import { GOODS_TYPE_OPTIONS, LIFTING_METHOD_OPTIONS, URGENCY_OPTIONS } from '@/types'
 
 const router = useRouter()
-const authStore = useAuthStore()
-const ordersStore = useOrdersStore()
+const orderStore = useOrdersStore()
 
-// 表单数据
-const form = ref({
+const formData = ref({
+  goods_type: '',
+  goods_weight: 50,
+  goods_desc: '',
   pickup_address: '',
   delivery_address: '',
-  goods_type: '',
-  goods_desc: '',
-  goods_weight: '' as string | number,
-  altitude: '' as string | number,
-  elevation_diff: '' as string | number,
-  lifting_method: '标准吊运',
-  urgency: 'today',
-  contact_phone: '',
-  remark: '',
+  pickup_lat: 0,
+  pickup_lng: 0,
+  delivery_lat: 0,
+  delivery_lng: 0,
+  terrain_type: 'MOUNTAIN',
+  time_required: 'STANDARD' as 'STANDARD' | 'URGENT_2H' | 'URGENT_4H' | 'SAME_DAY',
+  goods_value: 0,
 })
 
-const showGoodsTypePicker = ref(false)
-const showLiftingMethodPicker = ref(false)
-const priceLoading = ref(false)
-const submitLoading = ref(false)
-
-// Picker 列数据
-const goodsTypeColumns = GOODS_TYPE_OPTIONS.map(v => ({ text: v, value: v }))
-const liftingMethodColumns = LIFTING_METHOD_OPTIONS.map(v => ({ text: v, value: v }))
-
-// 实时价格估算
-const estimatedPrice = computed(() => ordersStore.priceEstimate)
-
-// 表单验证
-const isValid = computed(() => {
-  return (
-    form.value.pickup_address.trim() !== ''
-    && form.value.delivery_address.trim() !== ''
-    && form.value.goods_type !== ''
-    && Number(form.value.goods_weight) > 0
-    && Number(form.value.altitude) > 0
-    && Number(form.value.elevation_diff) >= 0
-    && form.value.contact_phone.trim() !== ''
-    && form.value.contact_phone.length === 11
-  )
-})
-
-// 监听重量和海拔变化，自动估算价格
-watch(
-  () => [form.value.goods_weight, form.value.altitude, form.value.elevation_diff, form.value.urgency],
-  async () => {
-    const weight = Number(form.value.goods_weight)
-    const altitude = Number(form.value.altitude)
-    const elevation = Number(form.value.elevation_diff)
-    if (weight > 0 && altitude > 0) {
-      priceLoading.value = true
-      await ordersStore.estimatePrice({
-        goods_weight: weight,
-        altitude,
-        elevation_diff: elevation,
-        urgency: form.value.urgency,
-      })
-      priceLoading.value = false
-    }
-  },
-  { deep: true },
-)
+const estimatedPrice = ref(299)
 
 function goBack() {
   router.back()
 }
 
-function onGoodsTypeConfirm({ selectedOptions }: { selectedOptions: Array<{ text: string, value: string }> }) {
-  form.value.goods_type = selectedOptions[0]?.value || ''
-  showGoodsTypePicker.value = false
-}
-
-function onLiftingMethodConfirm({ selectedOptions }: { selectedOptions: Array<{ text: string, value: string }> }) {
-  form.value.lifting_method = selectedOptions[0]?.value || '标准吊运'
-  showLiftingMethodPicker.value = false
-}
-
-async function handleSubmit() {
-  if (!isValid.value) {
-    showFailToast('请填写完整信息')
-    return
-  }
-
-  submitLoading.value = true
-  const { data, error } = await ordersStore.createOrder({
-    goods_type: form.value.goods_type,
-    goods_weight: Number(form.value.goods_weight),
-    goods_desc: form.value.goods_desc || undefined,
-    pickup_address: form.value.pickup_address,
-    delivery_address: form.value.delivery_address,
-    altitude: Number(form.value.altitude),
-    elevation_diff: Number(form.value.elevation_diff),
-    lifting_method: form.value.lifting_method,
-    urgency: form.value.urgency,
-    contact_phone: form.value.contact_phone,
-    remark: form.value.remark || undefined,
-  })
-  submitLoading.value = false
-
-  if (error) {
-    showFailToast(error || '下单失败')
-    return
-  }
-
-  showSuccessToast('下单成功')
-  if (data) {
-    router.replace(`/orders/${data.id}`)
-  }
-  else {
-    router.replace('/orders')
+async function submitOrder() {
+  try {
+    await orderStore.createOrder({
+      goods_type: formData.value.goods_type || '建材吊运',
+      goods_weight: formData.value.goods_weight,
+      goods_desc: formData.value.goods_desc,
+      pickup_address: formData.value.pickup_address,
+      delivery_address: formData.value.delivery_address,
+      pickup_lat: formData.value.pickup_lat,
+      pickup_lng: formData.value.pickup_lng,
+      delivery_lat: formData.value.delivery_lat,
+      delivery_lng: formData.value.delivery_lng,
+      altitude: 0,
+      elevation_diff: 0,
+      lifting_method: '标准吊运',
+      urgency: formData.value.time_required,
+      contact_phone: '',
+      remark: '',
+    })
+    router.push('/orders')
+  } catch (error) {
+    console.error('提交失败:', error)
   }
 }
-
-onMounted(() => {
-  // 预填联系人手机号
-  if (authStore.user?.phone) {
-    form.value.contact_phone = authStore.user.phone
-  }
-})
 </script>
 
 <template>
-  <div class="create-order-page">
+  <div class="order-page">
     <!-- 顶部导航 -->
-    <div class="navbar">
-      <van-icon name="arrow-left" class="back-icon" @click="goBack" />
-      <span class="navbar-title">发布吊运需求</span>
+    <div class="order-nav">
+      <div class="order-nav-back" @click="goBack">
+        <van-icon name="arrow-left" size="20" />
+      </div>
+      <div class="order-nav-title">发布吊运需求</div>
+      <div class="order-nav-placeholder" />
     </div>
 
-    <div class="form-container">
-      <!-- 地址信息 -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon">
-            📍
-          </div>
-          <span class="section-title">地址信息</span>
-        </div>
-        <div class="form-card">
-          <div class="form-row">
-            <label class="form-label">起始地址 <span class="required">*</span></label>
-            <van-field
-              v-model="form.pickup_address"
-              placeholder="请输入起始地址"
-              :border="false"
-              class="custom-field"
-            />
-          </div>
-          <div class="form-row">
-            <label class="form-label">目的地址 <span class="required">*</span></label>
-            <van-field
-              v-model="form.delivery_address"
-              placeholder="请输入目的地址"
-              :border="false"
-              class="custom-field"
-            />
-          </div>
-        </div>
+    <!-- Hero 区域 -->
+    <div class="order-hero">
+      <div class="order-hero-title">填写货物信息<br/>智能匹配最优飞手</div>
+      <div class="order-hero-badge">
+        <span class="order-hero-dot"></span>
+        30分钟响应
       </div>
+    </div>
 
-      <!-- 货物信息 -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon">
-            📦
-          </div>
-          <span class="section-title">货物信息</span>
+    <!-- 服务类型选择 -->
+    <div class="order-type-card">
+      <div class="section-label">选择服务类型</div>
+      <div class="order-type-grid">
+        <div
+          class="order-type-item"
+          :class="{ active: formData.goods_type === 'building' }"
+          @click="formData.goods_type = 'building'"
+        >
+          <van-icon name="shop-o" size="24" />
+          <span>建材吊运</span>
         </div>
-        <div class="form-card">
-          <div class="form-row">
-            <label class="form-label">货物类型 <span class="required">*</span></label>
-            <van-field
-              v-model="form.goods_type"
-              placeholder="请选择货物类型"
-              readonly
-              is-link
-              :border="false"
-              class="custom-field"
-              @click="showGoodsTypePicker = true"
-            />
-          </div>
-          <div class="form-row">
-            <label class="form-label">货物描述</label>
-            <van-field
-              v-model="form.goods_desc"
-              type="textarea"
-              placeholder="请描述货物信息，如：新鲜脐橙 500箱"
-              rows="2"
-              :border="false"
-              class="custom-field"
-            />
-          </div>
-          <div class="form-row">
-            <label class="form-label">重量 <span class="required">*</span></label>
-            <van-field
-              v-model="form.goods_weight"
-              type="digit"
-              placeholder="请输入货物重量"
-              :border="false"
-              class="custom-field"
-            >
-              <template #extra>
-                <span class="field-unit">kg</span>
-              </template>
-            </van-field>
-          </div>
+        <div
+          class="order-type-item"
+          :class="{ active: formData.goods_type === 'agriculture' }"
+          @click="formData.goods_type = 'agriculture'"
+        >
+          <van-icon name="gem-o" size="24" />
+          <span>农产品</span>
         </div>
-      </div>
-
-      <!-- 飞行参数 -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon">
-            ✈️
-          </div>
-          <span class="section-title">飞行参数</span>
+        <div
+          class="order-type-item"
+          :class="{ active: formData.goods_type === 'equipment' }"
+          @click="formData.goods_type = 'equipment'"
+        >
+          <van-icon name="setting-o" size="24" />
+          <span>设备吊装</span>
         </div>
-        <div class="form-card">
-          <div class="form-row">
-            <label class="form-label">海拔高度 <span class="required">*</span></label>
-            <van-field
-              v-model="form.altitude"
-              type="digit"
-              placeholder="请输入起始点海拔高度"
-              :border="false"
-              class="custom-field"
-            >
-              <template #extra>
-                <span class="field-unit">m</span>
-              </template>
-            </van-field>
-          </div>
-          <div class="form-row">
-            <label class="form-label">落差 <span class="required">*</span></label>
-            <van-field
-              v-model="form.elevation_diff"
-              type="digit"
-              placeholder="请输入起终点击落差"
-              :border="false"
-              class="custom-field"
-            >
-              <template #extra>
-                <span class="field-unit">m</span>
-              </template>
-            </van-field>
-          </div>
-          <div class="form-row">
-            <label class="form-label">吊运方式 <span class="required">*</span></label>
-            <van-field
-              v-model="form.lifting_method"
-              readonly
-              is-link
-              :border="false"
-              class="custom-field"
-              @click="showLiftingMethodPicker = true"
-            />
-          </div>
-          <div class="form-row">
-            <label class="form-label">时效要求 <span class="required">*</span></label>
-            <div class="urgency-group">
-              <div
-                v-for="option in URGENCY_OPTIONS"
-                :key="option.value"
-                class="urgency-btn"
-                :class="{ active: form.urgency === option.value }"
-                @click="form.urgency = option.value"
-              >
-                {{ option.label }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 联系方式 -->
-      <div class="section">
-        <div class="section-header">
-          <div class="section-icon">
-            📞
-          </div>
-          <span class="section-title">联系方式</span>
-        </div>
-        <div class="form-card">
-          <div class="form-row">
-            <label class="form-label">联系电话 <span class="required">*</span></label>
-            <van-field
-              v-model="form.contact_phone"
-              type="tel"
-              placeholder="请输入联系电话"
-              maxlength="11"
-              :border="false"
-              class="custom-field"
-            />
-          </div>
-          <div class="form-row">
-            <label class="form-label">备注</label>
-            <van-field
-              v-model="form.remark"
-              placeholder="如有特殊要求请填写"
-              :border="false"
-              class="custom-field"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- 价格估算 -->
-      <div v-if="estimatedPrice" class="price-summary">
-        <div class="price-header">
-          <span class="price-title">费用估算</span>
-          <van-loading v-if="priceLoading" size="14" />
-        </div>
-        <div class="price-breakdown">
-          <div class="price-row">
-            <span>基础费用</span>
-            <span>¥{{ estimatedPrice.base_price }}</span>
-          </div>
-          <div v-if="estimatedPrice.weight_fee" class="price-row">
-            <span>重量附加</span>
-            <span>¥{{ estimatedPrice.weight_fee }}</span>
-          </div>
-          <div v-if="estimatedPrice.altitude_fee" class="price-row">
-            <span>海拔附加</span>
-            <span>¥{{ estimatedPrice.altitude_fee }}</span>
-          </div>
-          <div v-if="estimatedPrice.urgency_fee" class="price-row">
-            <span>时效附加</span>
-            <span>¥{{ estimatedPrice.urgency_fee }}</span>
-          </div>
-          <div class="price-total">
-            <span>预估总价</span>
-            <span class="total-value">¥{{ estimatedPrice.total_price }}</span>
-          </div>
+        <div
+          class="order-type-item"
+          :class="{ active: formData.goods_type === 'emergency' }"
+          @click="formData.goods_type = 'emergency'"
+        >
+          <van-icon name="warning-o" size="24" />
+          <span>应急救援</span>
         </div>
       </div>
     </div>
 
-    <!-- 底部提交按钮 -->
-    <div class="submit-area safe-area-bottom">
-      <van-button
-        type="primary"
-        block
-        round
-        :loading="submitLoading"
-        :disabled="!isValid"
-        @click="handleSubmit"
-      >
-        发布需求
-      </van-button>
+    <!-- 货物信息 -->
+    <div class="order-section">
+      <div class="order-section-header">
+        <span class="order-section-bar"></span>
+        <span class="order-section-title">货物信息</span>
+      </div>
+      <div class="order-section-body">
+        <div class="order-field">
+          <span class="order-field-label">
+            <span class="order-field-required">*</span>
+            货物名称
+          </span>
+          <input class="order-field-input" v-model="formData.goods_desc" placeholder="请输入货物名称" />
+        </div>
+        <div class="order-field">
+          <span class="order-field-label">
+            <span class="order-field-required">*</span>
+            货物重量
+          </span>
+          <input class="order-field-input" v-model.number="formData.goods_weight" type="number" placeholder="请输入重量(kg)" />
+        </div>
+        <div class="order-field">
+          <span class="order-field-label">货物价值</span>
+          <input class="order-field-input" v-model.number="formData.goods_value" type="number" placeholder="请输入货物价值(元)" />
+        </div>
+      </div>
     </div>
 
-    <!-- 货物类型选择器 -->
-    <van-popup v-model:show="showGoodsTypePicker" position="bottom" round>
-      <van-picker
-        :columns="goodsTypeColumns"
-        @confirm="onGoodsTypeConfirm"
-        @cancel="showGoodsTypePicker = false"
-      />
-    </van-popup>
+    <!-- 起降点信息 -->
+    <div class="order-section">
+      <div class="order-section-header">
+        <span class="order-section-bar" style="background: #10B981;"></span>
+        <span class="order-section-title">起降点信息</span>
+      </div>
+      <div class="order-section-body">
+        <div class="order-field">
+          <span class="order-field-label">
+            <span class="order-field-required">*</span>
+            起飞地点
+          </span>
+          <input class="order-field-input" v-model="formData.pickup_address" placeholder="点击选择位置" />
+        </div>
+        <div class="order-field">
+          <span class="order-field-label">
+            <span class="order-field-required">*</span>
+            落地地点
+          </span>
+          <input class="order-field-input" v-model="formData.delivery_address" placeholder="点击选择位置" />
+        </div>
+      </div>
+    </div>
 
-    <!-- 吊运方式选择器 -->
-    <van-popup v-model:show="showLiftingMethodPicker" position="bottom" round>
-      <van-picker
-        :columns="liftingMethodColumns"
-        @confirm="onLiftingMethodConfirm"
-        @cancel="showLiftingMethodPicker = false"
-      />
-    </van-popup>
+    <!-- 费用预估 -->
+    <div class="order-price-card">
+      <div class="order-price-header">
+        <span class="order-price-label">费用预估</span>
+        <span class="order-price-rule">计费规则</span>
+      </div>
+      <div class="order-price-main">
+        <span class="order-price-amount">¥{{ estimatedPrice }}</span>
+        <span class="order-price-unit">/次起</span>
+      </div>
+      <div class="order-price-details">
+        <span>基础费 ¥299</span>
+        <span>超重费 ¥0</span>
+        <span>里程费 待定</span>
+      </div>
+    </div>
+
+    <!-- 提交按钮 -->
+    <div class="order-submit">
+      <button class="order-submit-btn" @click="submitOrder">
+        <van-icon name="guide-o" />
+        立即发布吊运需求
+      </button>
+      <div class="order-submit-tip">提交即表示同意《服务协议》</div>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.create-order-page {
+.order-page {
   min-height: 100vh;
   background: $color-bg-page;
-  padding-bottom: 80px;
 }
 
-.navbar {
+// 顶部导航
+.order-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg $spacing-xl;
+  background: white;
   position: sticky;
   top: 0;
   z-index: 100;
-  display: flex;
-  align-items: center;
-  height: $navbar-height;
-  padding: 0 $spacing-lg;
-  background: white;
-  border-bottom: 1px solid $color-border-light;
-}
-
-.back-icon {
-  font-size: 20px;
-  color: $color-text-primary;
-  margin-right: $spacing-md;
-  cursor: pointer;
-}
-
-.navbar-title {
-  font-size: $font-size-2xl;
-  font-weight: $font-weight-semibold;
-}
-
-.form-container {
-  padding: $spacing-md $spacing-lg;
-}
-
-.section {
-  margin-bottom: $spacing-lg;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  padding: $spacing-md 0;
-}
-
-.section-icon {
-  font-size: 18px;
-}
-
-.section-title {
-  font-size: $font-size-xl;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-}
-
-.form-card {
-  background: white;
-  border-radius: $radius-xl;
-  padding: $spacing-lg;
   box-shadow: $shadow-sm;
 }
 
-.form-row {
-  margin-bottom: $spacing-lg;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.form-label {
-  display: block;
-  font-size: $font-size-md;
-  font-weight: $font-weight-medium;
-  color: $color-text-secondary;
-  margin-bottom: $spacing-sm;
-  padding-left: $spacing-xs;
-}
-
-.required {
-  color: $color-danger;
-  margin-left: 2px;
-}
-
-.custom-field {
-  background: $color-bg-input;
-  border-radius: $radius-md;
-  padding: $spacing-sm $spacing-md;
-
-  :deep(.van-field__control) {
-    font-size: $font-size-lg;
-  }
-}
-
-.field-unit {
-  font-size: $font-size-md;
-  color: $color-text-secondary;
-}
-
-.urgency-group {
+.order-nav-back {
+  width: 36px;
+  height: 36px;
   display: flex;
-  gap: $spacing-sm;
-  flex-wrap: wrap;
-}
-
-.urgency-btn {
-  padding: $spacing-md $spacing-lg;
-  font-size: $font-size-md;
-  font-weight: $font-weight-medium;
-  border: 1px solid $color-border;
-  border-radius: $radius-md;
-  background: white;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $color-bg-page;
   color: $color-text-secondary;
   cursor: pointer;
-  transition: all $transition-fast;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $color-primary-bg;
+    color: $color-primary;
+  }
+}
+
+.order-nav-title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.order-nav-placeholder {
+  width: 36px;
+}
+
+// Hero 区域
+.order-hero {
+  background: linear-gradient(150deg, #0B1D3A 0%, $color-primary 60%, $color-primary-light 100%);
+  padding: $spacing-xl $spacing-xl $spacing-2xl;
+  color: white;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+}
+
+.order-hero-title {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+.order-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.order-hero-dot {
+  width: 6px;
+  height: 6px;
+  background: $color-success;
+  border-radius: 50%;
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+// 服务类型选择
+.order-type-card {
+  margin: -16px 16px 12px;
+  background: white;
+  border-radius: $radius-xl;
+  padding: 16px;
+  box-shadow: $shadow-lg;
+  position: relative;
+  z-index: 10;
+}
+
+.order-type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.order-type-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0;
+  border-radius: 12px;
+  border: 1.5px solid $color-border;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  span {
+    font-size: 12px;
+    font-weight: 600;
+    color: $color-text-secondary;
+  }
 
   &.active {
+    background: $color-primary-50;
     border-color: $color-primary;
     color: $color-primary;
-    background: $color-primary-bg;
-  }
 
-  &:active {
-    transform: scale(0.96);
+    span {
+      color: $color-primary;
+    }
   }
 }
 
-.price-summary {
+// 订单区块
+.order-section {
   background: white;
+  margin: 0 16px 12px;
   border-radius: $radius-xl;
-  padding: $spacing-xl;
-  margin-bottom: $spacing-lg;
+  overflow: hidden;
   box-shadow: $shadow-sm;
 }
 
-.price-header {
+.order-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 12px;
+}
+
+.order-section-bar {
+  width: 4px;
+  height: 16px;
+  background: $color-primary;
+  border-radius: 2px;
+}
+
+.order-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.order-section-body {
+  padding: 0 16px 16px;
+}
+
+.order-field {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid $color-border-light;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.order-field-label {
+  width: 80px;
+  font-size: 13px;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.order-field-required {
+  color: $color-danger;
+  margin-right: 2px;
+}
+
+.order-field-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: $color-text-primary;
+  text-align: right;
+
+  &::placeholder {
+    color: $color-text-placeholder;
+  }
+}
+
+// 费用预估
+.order-price-card {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border-radius: $radius-xl;
+  padding: 20px;
+  color: white;
+  box-shadow: $shadow-btn;
+}
+
+.order-price-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.order-price-label {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.order-price-rule {
+  font-size: 11px;
+  opacity: 0.7;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.order-price-main {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.order-price-amount {
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.order-price-unit {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+.order-price-details {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+// 提交按钮
+.order-submit {
+  padding: 0 16px 32px;
+}
+
+.order-submit-btn {
+  width: 100%;
+  padding: 16px;
+  text-align: center;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border-radius: $radius-xl;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  box-shadow: $shadow-btn;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.order-submit-tip {
+  text-align: center;
+  font-size: 12px;
+  color: $color-text-placeholder;
+  margin-top: 12px;
+}
+
+// Section 标签
+.section-label {
+  font-size: 11px;
+  font-weight: $font-weight-semibold;
+  color: $color-text-placeholder;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
   margin-bottom: $spacing-md;
-}
-
-.price-title {
-  font-size: $font-size-xl;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-}
-
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  padding: $spacing-sm 0;
-  font-size: $font-size-md;
-  color: $color-text-secondary;
-}
-
-.price-total {
-  display: flex;
-  justify-content: space-between;
-  padding-top: $spacing-md;
-  margin-top: $spacing-sm;
-  border-top: 1px solid $color-border-light;
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
-  color: $color-text-primary;
-}
-
-.total-value {
-  color: $color-danger;
-  font-size: $font-size-3xl;
-  font-weight: $font-weight-bold;
-}
-
-.submit-area {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: $spacing-lg $spacing-xl;
-  background: white;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
 }
 </style>

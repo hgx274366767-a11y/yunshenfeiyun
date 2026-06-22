@@ -35,6 +35,18 @@ const router = createRouter({
       meta: { requiresAuth: true, title: '订单详情' },
     },
     {
+      path: '/services',
+      name: 'Services',
+      component: () => import('@/views/services/ServicesView.vue'),
+      meta: { requiresAuth: false, title: '服务项目' },
+    },
+    {
+      path: '/services/:type',
+      name: 'ServiceDetail',
+      component: () => import('@/views/services/ServiceDetailView.vue'),
+      meta: { requiresAuth: false, title: '服务详情' },
+    },
+    {
       path: '/profile',
       name: 'Profile',
       component: () => import('@/views/profile/ProfileView.vue'),
