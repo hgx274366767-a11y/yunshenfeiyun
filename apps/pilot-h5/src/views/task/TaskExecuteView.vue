@@ -51,7 +51,6 @@ function navigateToCurrent() {
     return
   }
 
-  // H5 环境：打开高德地图网页版
   const url = `https://uri.amap.com/navigation?to=${lng},${lat},${encodeURIComponent(name || '')}&mode=car&callnative=1`
   window.open(url, '_blank')
 }
@@ -79,7 +78,6 @@ async function uploadPickupPhoto() {
   if (!order.value)
     return
 
-  // H5 环境：使用文件选择器
   const input = document.createElement('input')
   input.type = 'file'
   input.accept = 'image/*'
@@ -130,7 +128,6 @@ async function confirmDelivered() {
   if (!order.value)
     return
 
-  // H5 环境：使用文件选择器上传送达照片
   const input = document.createElement('input')
   input.type = 'file'
   input.accept = 'image/*'
@@ -170,12 +167,10 @@ function goBack() {
 }
 
 onMounted(async () => {
-  // 如果没有当前任务，尝试加载
   if (!pilotStore.currentTask) {
     await pilotStore.fetchCurrentTask()
   }
 
-  // 根据当前任务步骤设置步骤条
   if (pilotStore.currentTask) {
     const stepMap: Record<string, number> = {
       assigned: 0,
@@ -200,7 +195,7 @@ onMounted(async () => {
     <div v-if="order" class="content">
       <!-- 任务步骤条 -->
       <div class="status-indicator">
-        <van-steps :active="currentStep" active-color="#07c160">
+        <van-steps :active="currentStep" active-color="#10B981">
           <van-step>已接单</van-step>
           <van-step>到达取货点</van-step>
           <van-step>货物已装</van-step>
@@ -210,7 +205,7 @@ onMounted(async () => {
       </div>
 
       <!-- 当前操作卡片 -->
-      <div class="action-card">
+      <div class="action-card animate-in delay-1">
         <div class="action-title">
           {{ currentActionTitle }}
         </div>
@@ -219,91 +214,101 @@ onMounted(async () => {
         </div>
 
         <div class="navigation-area">
-          <van-button type="primary" block round size="large" @click="navigateToCurrent">
+          <button class="btn-primary" @click="navigateToCurrent">
             <van-icon name="location-o" />
             导航前往{{ currentTarget === 'pickup' ? '取货点' : '送达点' }}
-          </van-button>
+          </button>
         </div>
 
         <div class="operation-area">
-          <van-button
+          <button
             v-if="currentStep === 0"
-            type="primary"
-            block
-            round
+            class="btn-primary"
             @click="confirmArrived"
           >
             确认到达取货点
-          </van-button>
+          </button>
 
-          <van-button
+          <button
             v-if="currentStep === 1"
-            type="primary"
-            block
-            round
+            class="btn-primary"
             @click="uploadPickupPhoto"
           >
             上传装货照片
-          </van-button>
+          </button>
 
-          <van-button
+          <button
             v-if="currentStep === 2"
-            type="primary"
-            block
-            round
+            class="btn-primary"
             @click="startFlight"
           >
             开始飞行
-          </van-button>
+          </button>
 
-          <van-button
+          <button
             v-if="currentStep === 3"
-            type="success"
-            block
-            round
+            class="btn-primary"
+            style="background: linear-gradient(135deg, #10B981, #059669);"
             @click="confirmDelivered"
           >
             确认送达
-          </van-button>
+          </button>
 
-          <van-button
+          <button
             v-if="currentStep === 4"
-            type="default"
-            block
-            round
+            class="btn-secondary"
             disabled
           >
             任务已完成
-          </van-button>
+          </button>
         </div>
       </div>
 
       <!-- 订单详情 -->
-      <van-cell-group title="订单信息">
-        <van-cell title="取货点" :label="order.pickup_address">
-          <template #left-icon>
-            <van-icon name="location-o" style="margin-right: 8px; color: #1989fa;" />
-          </template>
-        </van-cell>
-        <van-cell title="送达点" :label="order.delivery_address">
-          <template #left-icon>
-            <van-icon name="location-o" style="margin-right: 8px; color: #07c160;" />
-          </template>
-        </van-cell>
-        <van-cell title="物品" :value="`${order.goods_type} · ${order.goods_weight}kg`" />
-        <van-cell v-if="order.altitude" title="海拔" :value="`${order.altitude}m`" />
-        <van-cell v-if="order.elevation_diff" title="落差" :value="`${order.elevation_diff}m`" />
-        <van-cell v-if="order.lifting_method" title="吊运方式" :value="order.lifting_method" />
-      </van-cell-group>
+      <div class="order-info animate-in delay-2">
+        <div class="section-title">订单信息</div>
+        <div class="info-card">
+          <div class="info-row">
+            <div class="info-icon start">
+              <van-icon name="location-o" />
+            </div>
+            <div class="info-content">
+              <div class="info-label">取货点</div>
+              <div class="info-value">{{ order.pickup_address || '待确认' }}</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon end">
+              <van-icon name="location-o" />
+            </div>
+            <div class="info-content">
+              <div class="info-label">送达点</div>
+              <div class="info-value">{{ order.delivery_address || '待确认' }}</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon blue">
+              <van-icon name="box-o" />
+            </div>
+            <div class="info-content">
+              <div class="info-label">物品信息</div>
+              <div class="info-value">{{ order.goods_type }} · {{ order.goods_weight }}kg</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- 紧急联系 -->
-      <van-cell-group title="紧急联系">
-        <van-cell title="平台客服" value="400-xxx-xxxx" is-link @click="callService" />
-      </van-cell-group>
+      <div class="emergency-contact animate-in delay-3">
+        <button class="btn-secondary" @click="callService">
+          <van-icon name="phone-o" />
+          联系客服 400-xxx-xxxx
+        </button>
+      </div>
     </div>
 
     <div v-else class="loading">
-      <van-loading size="24" vertical>
+      <van-loading size="24" color="#1D4ED8">
         加载中...
       </van-loading>
     </div>
@@ -322,22 +327,22 @@ onMounted(async () => {
   z-index: 100;
   display: flex;
   align-items: center;
-  height: $navbar-height;
-  padding: 0 $spacing-lg;
+  height: 48px;
+  padding: 0 16px;
   background: white;
-  border-bottom: 1px solid $color-border-light;
+  border-bottom: 1px solid $color-border;
 }
 
 .back-icon {
   font-size: 20px;
   color: $color-text-primary;
-  margin-right: $spacing-md;
+  margin-right: 12px;
   cursor: pointer;
 }
 
 .navbar-title {
-  font-size: $font-size-2xl;
-  font-weight: $font-weight-semibold;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .content {
@@ -346,37 +351,112 @@ onMounted(async () => {
 
 .status-indicator {
   background: white;
-  padding: $spacing-xl $spacing-md;
+  padding: 20px 16px;
+  margin-bottom: 16px;
 }
 
 .action-card {
   background: white;
-  margin: $spacing-md;
-  padding: $spacing-2xl;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-sm;
+  margin: 0 16px 16px;
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .action-title {
-  font-size: $font-size-3xl;
-  font-weight: $font-weight-bold;
+  font-size: 24px;
+  font-weight: 800;
   text-align: center;
-  margin-bottom: $spacing-md;
+  margin-bottom: 12px;
+  color: $color-text-primary;
 }
 
 .action-desc {
-  font-size: $font-size-lg;
+  font-size: 14px;
   color: $color-text-secondary;
   text-align: center;
-  margin-bottom: $spacing-2xl;
+  margin-bottom: 24px;
+  line-height: 1.6;
 }
 
 .navigation-area {
-  margin-bottom: $spacing-xl;
+  margin-bottom: 16px;
 }
 
-.operation-area {
-  margin-top: $spacing-md;
+.order-info {
+  padding: 0 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: $color-text-primary;
+  margin-bottom: 12px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+
+  &.start {
+    background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+    color: #059669;
+  }
+
+  &.end {
+    background: linear-gradient(135deg, #FEF2F2, #FECACA);
+    color: #DC2626;
+  }
+
+  &.blue {
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    color: #1D4ED8;
+  }
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-label {
+  font-size: 12px;
+  color: $color-text-secondary;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.emergency-contact {
+  padding: 16px;
 }
 
 .loading {

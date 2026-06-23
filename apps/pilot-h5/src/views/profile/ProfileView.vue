@@ -27,15 +27,6 @@ const creditLabel = computed(() => {
   return map[pilotStore.creditLevel] || '见习飞手'
 })
 
-const creditTagType = computed(() => {
-  const map: Record<string, string> = {
-    gold: 'warning',
-    senior: 'primary',
-    probation: 'default',
-  }
-  return (map[pilotStore.creditLevel] || 'default') as 'warning' | 'primary' | 'default'
-})
-
 async function handleToggleOnline(checked: boolean) {
   const success = await pilotStore.toggleOnlineStatus()
   if (success) {
@@ -49,6 +40,26 @@ async function handleToggleOnline(checked: boolean) {
 
 function goToOrders() {
   router.push('/orders')
+}
+
+function goToIncome() {
+  // TODO: 收入明细页面
+}
+
+function goToFlightRecords() {
+  // TODO: 飞行记录页面
+}
+
+function goToInsurance() {
+  // TODO: 保险管理页面
+}
+
+function goToCertification() {
+  // TODO: 资质认证页面
+}
+
+function goToSettings() {
+  // TODO: 账户设置页面
 }
 
 function callService() {
@@ -77,87 +88,137 @@ onMounted(() => {
 
 <template>
   <div class="profile-page">
+    <!-- 状态栏 -->
+    <div class="status-bar" style="background: linear-gradient(135deg, #1D4ED8, #1E40AF);">
+      <span>9:41</span>
+      <div class="status-icons">
+        <van-icon name="signal" size="12" />
+        <van-icon name="wifi" size="12" />
+        <van-icon name="volume" size="12" />
+      </div>
+    </div>
+
     <!-- 用户信息卡片 -->
-    <div class="user-card">
-      <div class="avatar">
-        <van-icon name="manager" size="40" color="white" />
-      </div>
-      <div class="user-info">
-        <div class="user-name">
-          {{ pilotStore.pilot?.name || '飞手' }}
+    <div class="profile-header">
+      <div class="profile-user">
+        <div class="profile-avatar">
+          <van-icon name="manager" size="36" color="white" />
         </div>
-        <div class="user-phone">
-          {{ pilotStore.pilot?.phone || authStore.user?.phone || '' }}
+        <div class="profile-info">
+          <div class="profile-name">
+            {{ pilotStore.pilot?.name || '飞手' }}
+          </div>
+          <div class="profile-phone">
+            {{ pilotStore.pilot?.phone || authStore.user?.phone || '' }}
+          </div>
+          <div class="profile-badge">
+            <van-icon name="certificate" size="12" />
+            {{ creditLabel }}
+          </div>
         </div>
-      </div>
-      <div class="credit-badge" :class="pilotStore.creditLevel">
-        {{ creditLabel }}
       </div>
     </div>
 
     <!-- 数据统计 -->
-    <div class="stats-card">
-      <div class="stat-item">
-        <div class="stat-value">
-          {{ pilotStore.pilot?.total_orders || 0 }}
-        </div>
-        <div class="stat-label">
-          总订单
-        </div>
+    <div class="profile-stats-card animate-in delay-1">
+      <div class="profile-stat">
+        <div class="profile-stat-value">{{ pilotStore.pilot?.total_orders || 0 }}</div>
+        <div class="profile-stat-label">总订单</div>
       </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-value">
-          ¥{{ pilotStore.pilot?.total_earnings || 0 }}
-        </div>
-        <div class="stat-label">
-          总收入
-        </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value">98%</div>
+        <div class="profile-stat-label">好评率</div>
       </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-value">
-          {{ pilotStore.pilot?.today_orders || 0 }}
-        </div>
-        <div class="stat-label">
-          今日订单
-        </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value">4.9</div>
+        <div class="profile-stat-label">信用分</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value">¥{{ pilotStore.pilot?.total_earnings || 0 }}</div>
+        <div class="profile-stat-label">总收入</div>
       </div>
     </div>
 
     <!-- 在线状态 -->
-    <div class="status-section">
+    <div class="status-section animate-in delay-2">
       <div class="status-row">
-        <span class="status-label">在线状态</span>
+        <div class="status-info">
+          <div class="status-icon" :class="{ active: onlineChecked }">
+            <van-icon :name="onlineChecked ? 'wifi' : 'warning-o'" />
+          </div>
+          <div>
+            <div class="status-title">在线接单</div>
+            <div class="status-desc">{{ onlineChecked ? '当前在线，可接收新任务' : '当前离线，无法接收任务' }}</div>
+          </div>
+        </div>
         <van-switch v-model="onlineChecked" size="24" @change="handleToggleOnline" />
       </div>
     </div>
 
-    <!-- 菜单列表 -->
-    <van-cell-group class="menu-group">
-      <van-cell title="我的订单" is-link icon="orders-o" @click="goToOrders" />
-      <van-cell title="收入明细" is-link icon="gold-coin-o" />
-      <van-cell title="飞行记录" is-link icon="label-o" />
-      <van-cell title="信用评级" is-link icon="medal-o">
-        <template #value>
-          <van-tag :type="creditTagType">
-            {{ creditLabel }}
-          </van-tag>
-        </template>
-      </van-cell>
-    </van-cell-group>
+    <!-- 工作管理 -->
+    <div class="profile-section animate-in delay-2">
+      <div class="profile-section-header">工作管理</div>
+      <div class="profile-menu-item" @click="goToOrders">
+        <div class="profile-menu-icon blue">
+          <van-icon name="orders-o" />
+        </div>
+        <span class="profile-menu-text">我的订单</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
+      <div class="profile-menu-item" @click="goToIncome">
+        <div class="profile-menu-icon green">
+          <van-icon name="gold-coin-o" />
+        </div>
+        <span class="profile-menu-text">收入明细</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
+      <div class="profile-menu-item" @click="goToFlightRecords">
+        <div class="profile-menu-icon orange">
+          <van-icon name="aim" />
+        </div>
+        <span class="profile-menu-text">飞行记录</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
+      <div class="profile-menu-item" @click="goToInsurance">
+        <div class="profile-menu-icon purple">
+          <van-icon name="shield-o" />
+        </div>
+        <span class="profile-menu-text">保险管理</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
+    </div>
 
-    <van-cell-group class="menu-group">
-      <van-cell title="帮助中心" is-link icon="question-o" />
-      <van-cell title="联系客服" is-link icon="service-o" @click="callService" />
-      <van-cell title="关于我们" is-link icon="info-o" />
-    </van-cell-group>
-
-    <!-- 退出登录 -->
-    <div class="logout-area">
-      <van-button type="danger" block round plain @click="handleLogout">
-        退出登录
-      </van-button>
+    <!-- 账户设置 -->
+    <div class="profile-section animate-in delay-3">
+      <div class="profile-section-header">账户设置</div>
+      <div class="profile-menu-item" @click="goToCertification">
+        <div class="profile-menu-icon blue">
+          <van-icon name="card-o" />
+        </div>
+        <span class="profile-menu-text">资质认证</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
+      <div class="profile-menu-item" @click="goToSettings">
+        <div class="profile-menu-icon green">
+          <van-icon name="setting-o" />
+        </div>
+        <span class="profile-menu-text">账户设置</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
+      <div class="profile-menu-item" @click="callService">
+        <div class="profile-menu-icon orange">
+          <van-icon name="service-o" />
+        </div>
+        <span class="profile-menu-text">联系客服</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
+      <div class="profile-menu-item" @click="handleLogout">
+        <div class="profile-menu-icon red">
+          <van-icon name="cross" />
+        </div>
+        <span class="profile-menu-text">退出登录</span>
+        <van-icon name="chevron-right" class="profile-menu-arrow" />
+      </div>
     </div>
   </div>
 </template>
@@ -166,125 +227,249 @@ onMounted(() => {
 .profile-page {
   min-height: 100vh;
   background: $color-bg-page;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 88px);
 }
 
-.user-card {
+.status-bar {
+  height: 48px;
+  padding: 14px 24px 0;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: $spacing-2xl $spacing-xl;
-  background: linear-gradient(135deg, $color-primary, $color-primary-dark);
+  font-size: 15px;
+  font-weight: 600;
   color: white;
 }
 
-.avatar {
-  width: 64px;
-  height: 64px;
+.status-icons {
+  display: flex;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.profile-header {
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+  padding: 28px 24px 48px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-header::before {
+  content: '';
+  position: absolute;
+  bottom: -60%;
+  right: -40%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255,255,255,0.08);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-user {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: $spacing-lg;
-  flex-shrink: 0;
+  border: 4px solid rgba(255,255,255,0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
-.user-info {
+.profile-info {
   flex: 1;
 }
 
-.user-name {
-  font-size: $font-size-2xl;
-  font-weight: $font-weight-bold;
-  margin-bottom: $spacing-xs;
+.profile-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-.user-phone {
-  font-size: $font-size-md;
+.profile-phone {
+  font-size: 14px;
   opacity: 0.8;
+  margin-bottom: 8px;
 }
 
-.credit-badge {
-  padding: $spacing-xs $spacing-md;
-  border-radius: $radius-md;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-semibold;
-
-  &.gold {
-    background: #FFF7E6;
-    color: $color-warning;
-  }
-
-  &.senior {
-    background: $color-primary-bg;
-    color: $color-primary;
-  }
-
-  &.probation {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
-}
-
-.stats-card {
-  display: flex;
+.profile-badge {
+  display: inline-flex;
   align-items: center;
-  background: white;
-  margin: $spacing-md;
-  padding: $spacing-xl;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-sm;
+  gap: 6px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.stat-item {
-  flex: 1;
+.profile-stats-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: -28px 20px 20px;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  position: relative;
+  z-index: 20;
+}
+
+.profile-stat {
   text-align: center;
 }
 
-.stat-value {
-  font-size: $font-size-3xl;
-  font-weight: $font-weight-bold;
-  color: $color-text-primary;
-  margin-bottom: $spacing-xs;
+.profile-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1D4ED8;
+  margin-bottom: 4px;
 }
 
-.stat-label {
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-}
-
-.stat-divider {
-  width: 1px;
-  height: 32px;
-  background: $color-border-light;
+.profile-stat-label {
+  font-size: 11px;
+  color: #64748B;
 }
 
 .status-section {
   background: white;
-  margin: $spacing-md;
-  border-radius: $radius-xl;
+  margin: 0 16px 16px;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .status-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $spacing-xl;
+  padding: 16px;
 }
 
-.status-label {
-  font-size: $font-size-lg;
-  color: $color-text-primary;
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.menu-group {
-  margin: $spacing-md;
-  border-radius: $radius-xl;
+.status-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: #F1F5F9;
+  color: #94A3B8;
+
+  &.active {
+    background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+    color: #10B981;
+  }
+}
+
+.status-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0F172A;
+  margin-bottom: 2px;
+}
+
+.status-desc {
+  font-size: 12px;
+  color: #94A3B8;
+}
+
+.profile-section {
+  background: white;
+  margin: 0 16px 16px;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
-.logout-area {
-  padding: $spacing-2xl $spacing-xl;
+.profile-section-header {
+  padding: 18px 20px 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  transition: background 0.2s;
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #F8FAFC;
+  }
+}
+
+.profile-menu-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-right: 16px;
+
+  &.blue {
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    color: #1D4ED8;
+  }
+
+  &.green {
+    background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+    color: #059669;
+  }
+
+  &.orange {
+    background: linear-gradient(135deg, #FFF7ED, #FED7AA);
+    color: #D97706;
+  }
+
+  &.purple {
+    background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
+    color: #7C3AED;
+  }
+
+  &.red {
+    background: linear-gradient(135deg, #FEF2F2, #FECACA);
+    color: #DC2626;
+  }
+}
+
+.profile-menu-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: #0F172A;
+}
+
+.profile-menu-arrow {
+  color: #94A3B8;
+  font-size: 14px;
 }
 </style>

@@ -1,39 +1,39 @@
-// 云深飞运 设计系统变量
-// 基于 UI 原型提取的品牌色和间距规范
+// 云深飞运 飞手端 - 全新设计系统变量
+// 美团风格 + 科技感 + 亲和力
 
 // ========== 品牌色 ==========
-$color-primary: #4361EE;
-$color-primary-light: #5B7BF7;
-$color-primary-dark: #3651DE;
-$color-primary-bg: #F0F5FF;
+$color-primary: #1D4ED8;
+$color-primary-light: #3B82F6;
+$color-primary-dark: #1E40AF;
+$color-primary-bg: rgba(29, 78, 216, 0.08);
 
 // ========== 功能色 ==========
-$color-success: #52C41A;
-$color-warning: #FA8C16;
-$color-danger: #FF4D4F;
-$color-info: #1890FF;
+$color-success: #10B981;
+$color-warning: #F59E0B;
+$color-danger: #EF4444;
+$color-info: #3B82F6;
 
 // ========== 中性色 ==========
-$color-text-primary: #1A1A1A;
-$color-text-secondary: #666666;
-$color-text-placeholder: #BFBFBF;
-$color-text-disabled: #CCCCCC;
+$color-text-primary: #0F172A;
+$color-text-secondary: #64748B;
+$color-text-placeholder: #94A3B8;
+$color-text-disabled: #CBD5E1;
 
 // ========== 背景色 ==========
-$color-bg-page: #F5F7FA;
+$color-bg-page: #F8FAFC;
 $color-bg-card: #FFFFFF;
-$color-bg-input: #F8F8F8;
+$color-bg-input: #F1F5F9;
 
 // ========== 边框 ==========
-$color-border: #E8E8E8;
-$color-border-light: #ECECEC;
+$color-border: #E2E8F0;
+$color-border-light: #F1F5F9;
 
 // ========== 圆角 ==========
-$radius-sm: 6px;
-$radius-md: 8px;
-$radius-lg: 10px;
-$radius-xl: 12px;
-$radius-2xl: 16px;
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-xl: 20px;
+$radius-2xl: 24px;
 
 // ========== 间距 ==========
 $spacing-xs: 4px;
@@ -50,24 +50,25 @@ $font-size-sm: 13px;
 $font-size-md: 14px;
 $font-size-lg: 15px;
 $font-size-xl: 16px;
-$font-size-2xl: 17px;
+$font-size-2xl: 18px;
 $font-size-3xl: 24px;
 
 $font-weight-normal: 400;
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
+$font-weight-extrabold: 800;
 
 // ========== 阴影 ==========
-$shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.04);
-$shadow-md: 0 2px 12px rgba(0, 0, 0, 0.04);
-$shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
 
 // ========== 动画 ==========
 $transition-fast: 0.2s ease;
 $transition-normal: 0.3s ease;
 
 // ========== 布局 ==========
-$navbar-height: 46px;
-$tabbar-height: 50px;
+$navbar-height: 48px;
+$tabbar-height: 88px;
 $max-width: 420px;
