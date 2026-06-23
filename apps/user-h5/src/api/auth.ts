@@ -9,63 +9,41 @@ export interface VerifyOtpParams {
   token: string
 }
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
-
 export const authApi = {
   /**
-   * 发送短信验证码（调用自定义 Edge Function）
+   * 发送验证码（使用邮箱验证码，手机号作为邮箱前缀）
    */
   async sendOtp(params: SendOtpParams): Promise<{ error?: string }> {
-    try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ phone: params.phone }),
-      })
+    // 将手机号转换为邮箱格式：13800138000 -> 13800138000@yunshenfeiyun.com
+    const email = `${params.phone}@yunshenfeiyun.com`
 
-      const data = await response.json()
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email,
+    })
 
-      if (!response.ok || !data.success) {
-        return { error: data.error?.message || '验证码发送失败' }
-      }
-      return {}
-    } catch (error) {
-      return { error: '网络错误，请稍后重试' }
+    if (error) {
+      return { error: error.message }
     }
+    return {}
   },
 
   /**
-   * 验证短信验证码并登录（调用自定义 Edge Function）
+   * 验证验证码并登录
    */
   async verifyOtp(params: VerifyOtpParams): Promise<{ error?: string }> {
-    try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-sms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ phone: params.phone, code: params.token }),
-      })
+    // 将手机号转换为邮箱格式
+    const email = `${params.phone}@yunshenfeiyun.com`
 
-      const data = await response.json()
+    const { error } = await supabase.auth.verifyOtp({
+      email: email,
+      token: params.token,
+      type: 'email',
+    })
 
-      if (!response.ok || !data.success) {
-        return { error: data.error?.message || '验证码验证失败' }
-      }
-
-      // 存储用户信息到本地
-      if (data.data?.user) {
-        localStorage.setItem('user', JSON.stringify(data.data.user))
-      }
-
-      return {}
-    } catch (error) {
-      return { error: '网络错误，请稍后重试' }
+    if (error) {
+      return { error: error.message }
     }
+    return {}
   },
 
   /**
