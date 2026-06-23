@@ -58,9 +58,7 @@ async function handleLogin() {
     <!-- Hero区域 -->
     <div class="login-hero">
       <div class="login-logo">
-        <div class="logo-placeholder">
-          <van-icon name="helicopter-o" size="56" color="white" />
-        </div>
+        <img src="@/assets/logo2.png" alt="云深飞运Logo" />
       </div>
       <div class="login-brand">
         <h2><span class="brand-en">CloudAero</span>云深飞运</h2>
@@ -191,14 +189,10 @@ async function handleLogin() {
   overflow: hidden;
 }
 
-.logo-placeholder {
+.login-logo img {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #1E40AF, #3B82F6);
-  border-radius: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  object-fit: cover;
 }
 
 @keyframes float {
