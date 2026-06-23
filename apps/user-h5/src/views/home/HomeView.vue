@@ -34,9 +34,7 @@ function goToServices() {
       <div class="brand-row">
         <div class="brand-left">
           <div class="logo-box">
-            <div class="logo-placeholder" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:linear-gradient(135deg,#1E40AF,#3B82F6);border-radius:14px;">
-              <van-icon name="helicopter-o" size="32" color="white" />
-            </div>
+            <img src="@/assets/logo2.png" alt="云深飞运Logo" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" />
           </div>
           <div>
             <div class="brand-name">云深飞运</div>

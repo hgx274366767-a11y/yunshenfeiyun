@@ -50,9 +50,7 @@ async function handleLogin() {
       <div class="login-hero-bg"></div>
       <div class="login-hero-content">
         <div class="login-logo">
-          <div class="login-logo-placeholder">
-            <van-icon name="helicopter-o" size="48" color="white" />
-          </div>
+          <img src="@/assets/logo2.png" alt="云深飞运Logo" />
         </div>
         <div class="login-brand-en">CloudAero</div>
         <div class="login-brand-cn">云深飞运</div>
