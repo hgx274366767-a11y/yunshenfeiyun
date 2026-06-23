@@ -262,6 +262,9 @@ async function handleLogin() {
   border: none;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 
   &:disabled {
     opacity: 0.6;
