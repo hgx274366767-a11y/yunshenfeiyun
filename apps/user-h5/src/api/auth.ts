@@ -9,41 +9,66 @@ export interface VerifyOtpParams {
   token: string
 }
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+
 export const authApi = {
   /**
-   * 发送验证码（使用邮箱验证码，手机号作为邮箱前缀）
+   * 发送短信验证码（调用 Edge Function）
    */
   async sendOtp(params: SendOtpParams): Promise<{ error?: string }> {
-    // 将手机号转换为邮箱格式：13800138000 -> 13800138000@yunshenfeiyun.com
-    const email = `${params.phone}@yunshenfeiyun.com`
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ phone: params.phone }),
+      })
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email,
-    })
+      const data = await response.json()
 
-    if (error) {
-      return { error: error.message }
+      if (!response.ok || data.error) {
+        return { error: data.error || '验证码发送失败' }
+      }
+      return {}
+    } catch (error) {
+      return { error: '网络错误，请稍后重试' }
     }
-    return {}
   },
 
   /**
-   * 验证验证码并登录
+   * 验证短信验证码并登录（调用 Edge Function）
    */
   async verifyOtp(params: VerifyOtpParams): Promise<{ error?: string }> {
-    // 将手机号转换为邮箱格式
-    const email = `${params.phone}@yunshenfeiyun.com`
+    try {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-sms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ phone: params.phone, code: params.token }),
+      })
 
-    const { error } = await supabase.auth.verifyOtp({
-      email: email,
-      token: params.token,
-      type: 'email',
-    })
+      const data = await response.json()
 
-    if (error) {
-      return { error: error.message }
+      if (!response.ok || data.error) {
+        return { error: data.error || '验证码验证失败' }
+      }
+
+      // 存储用户信息到本地
+      if (data.data?.user) {
+        localStorage.setItem('user', JSON.stringify(data.data.user))
+      }
+
+      return {}
+    } catch (error) {
+      return { error: '网络错误，请稍后重试' }
     }
-    return {}
   },
 
   /**
